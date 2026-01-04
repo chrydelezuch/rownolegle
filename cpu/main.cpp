@@ -81,7 +81,7 @@ int main() {
     float** TAB = nullptr;
     float** OUT = nullptr;
 
-    if (loadDataFromFile("dane.txt", N, R, TAB))
+    if (loadDataFromFile("dane1.txt", N, R, TAB))
     {
         int M = N - 2*R; // rozmiar tablicy OUT
         if(M > 0){

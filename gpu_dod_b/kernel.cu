@@ -54,7 +54,7 @@ __global__ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, in
 }
 
 
-bool loadDataFromFile(const string& fileName, int& N, int& R, int& BS, int& k, float**& matrix, float*& data)
+bool loadDataFromFile(const string& fileName, int& N, float**& matrix, float*& data)
 {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -62,7 +62,7 @@ bool loadDataFromFile(const string& fileName, int& N, int& R, int& BS, int& k, f
         return false;
     }
 
-    file >> N >> R;
+    file >> N;
 
     data = new float[N * N];
     matrix = new float* [N];
@@ -101,17 +101,18 @@ bool saveMatrixToFile(const string& fileName, float** matrix, int N)
 int main(int argc, char* argv[])
 {
     int N, R, BS, k;
+     string filename = argv[1];
 
-
-    k = std::atoi(argv[1]);
-    BS = std::atoi(argv[2]);
+    R = std::atoi(argv[2]);
+    k = std::atoi(argv[3]);
+    BS = std::atoi(argv[4]);
 
     float* TAB_o = nullptr;
     float* OUT_o = nullptr;
     float** TAB = nullptr;
     float** OUT = nullptr;
 
-    if (!loadDataFromFile("dane.txt", N, R, TAB, TAB_o))
+    if (!loadDataFromFile(filename, N, TAB, TAB_o))
         return 1;
 
     int M = N - 2 * R;

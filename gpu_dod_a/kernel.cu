@@ -52,7 +52,7 @@ __global__ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, in
 }
 
 
-bool loadDataFromFile(const string& fileName, int& N, int& R, float**& matrix, float*& data)
+bool loadDataFromFile(const string& fileName, int& N, float**& matrix, float*& data)
 {
     ifstream file(fileName);
     if (!file.is_open()) {
@@ -60,7 +60,7 @@ bool loadDataFromFile(const string& fileName, int& N, int& R, float**& matrix, f
         return false;
     }
 
-    file >> N >> R;
+    file >> N;
 
     data = new float[N * N];
     matrix = new float* [N];
@@ -100,15 +100,18 @@ int main(int argc, char* argv[])
 {
     int N, R, BS, k;
 
-    k = std::atoi(argv[1]);
-    BS = std::atoi(argv[2]);
+    string filename = argv[1];
+
+    R = std::atoi(argv[2]);
+    k = std::atoi(argv[3]);
+    BS = std::atoi(argv[4]);
 
     float* TAB_o = nullptr;
     float* OUT_o = nullptr;
     float** TAB = nullptr;
     float** OUT = nullptr;
 
-    if (!loadDataFromFile("dane.txt", N, R, TAB, TAB_o))
+    if (!loadDataFromFile(filename, N, TAB, TAB_o))
         return 1;
 
     int M = N - 2 * R;
@@ -144,7 +147,7 @@ int main(int argc, char* argv[])
 }
 
 
-// Helper function for using CUDA to add vectors in parallel.
+
 cudaError_t addWithCuda(float *TAB, float *OUT, int& N, int& M, int& R, int& BS, int& k)
 {
     float *dev_tab = 0;

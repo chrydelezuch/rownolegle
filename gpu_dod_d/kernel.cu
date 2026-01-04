@@ -28,7 +28,7 @@ __device__ __forceinline__ float calculateElement(float* TAB, int N, int R, int 
     for (int i = x - R; i <= x + R; i++) {
         for (int j = y - R; j <= y + R; j++) {
             sum += TAB[i * N + j];
-            if(x == 1 && y == 1) printf("%d z %d z %f z %d \n ", x, y, TAB[i * N + j], i*N+j);
+            //if(x == 1 && y == 1) printf("%d z %d z %f z %d \n ", x, y, TAB[i * N + j], i*N+j);
         }
     }
 	// printf("%d %d sum%f \n", x, y, sum);
@@ -37,7 +37,7 @@ __device__ __forceinline__ float calculateElement(float* TAB, int N, int R, int 
 
 __device__ __forceinline__ void copyToShared2D(float* TAB, float* localTAB, int N, int localTabXDim, int startX, int startY, int endX, int endY)
 {
-    int tid = threadIdx.y * blockDim.x + threadIdx.x;
+    int tid = threadIdx.x * blockDim.y + threadIdx.y;
     int stride = blockDim.x * blockDim.y;
     int total = (endX * N + endY) - (startX * N + startY) + 1;
 
@@ -53,21 +53,23 @@ __device__ __forceinline__ void copyToShared2D(float* TAB, float* localTAB, int 
 
 __global__ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, int threadsNum, int localTabXDim)
 {
-    int localId = threadIdx.y * blockDim.x + threadIdx.x;
+    int localId = threadIdx.x * blockDim.y + threadIdx.y;
     int blockThreads = blockDim.x * blockDim.y;
-    int globalId = blockIdx.x * blockThreads + localId;
+
+    int globalId = blockIdx.x + localId * gridDim.x;
+    
 
     extern __shared__ float localTAB[];
 
 
     for (int i = 0; i < k; i++) {
-        int finalIndex = i * threadsNum + globalId;
+         int finalIndex = globalId * k + i;
 
         if (finalIndex >= M * M) continue;
 
         int startX = (finalIndex - localId ) / M;
         int startY = (finalIndex - localId) % M;
-	int endX = (blockThreads+finalIndex - localId-1) / M + 2 * R;
+	    int endX = (blockThreads+finalIndex - localId-1) / M + 2 * R;
         int endY = (blockThreads+finalIndex - localId-1) % M + 2 * R;
 
         copyToShared2D(TAB, localTAB, N, localTabXDim, startX, startY, endX, endY);
