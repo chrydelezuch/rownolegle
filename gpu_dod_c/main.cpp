@@ -6,6 +6,7 @@
 
 #include "FileManager.h"
 #include "CudaCompute.h"
+
 #include <cuda_runtime.h>
 
 

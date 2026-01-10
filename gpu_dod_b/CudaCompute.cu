@@ -32,10 +32,10 @@ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, int threadsNu
     // localId is calculated in wrong way, it is not coalescing
     // subsequent threads are not allocated to subsequent memory cells
     int localId = threadIdx.y * blockDim.x + threadIdx.x;
-    int globalId = blockIdx.x * (blockDim.x * blockDim.y) + localId;
+    int globalId = blockIdx.x + localId * gridDim.x;
 
     for (int i = 0; i < k; i++) {
-        int finalIndex = threadsNum * i + globalId;
+        int finalIndex = globalId * k + i;
 
         if (finalIndex >= M * M) continue;
 

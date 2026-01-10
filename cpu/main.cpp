@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 using namespace std;
 
 bool loadDataFromFile(const string& fileName, int& N, int& R, float**& matrix)
@@ -12,7 +13,7 @@ bool loadDataFromFile(const string& fileName, int& N, int& R, float**& matrix)
     }
 
     // Read N and R
-    file >> N >> R;
+    file >> N ;
 
     // Allocate N x N matrix
     matrix = new float*[N];
@@ -75,15 +76,16 @@ float calculateElement(float ** TAB, int R, int x, int y){
     }
     return sum;
 }
-int main() {
+int main(int argc, char* argv[]){
 
     int N, R;
+    R = atoi(argv[2]);
     float** TAB = nullptr;
     float** OUT = nullptr;
 
-    if (loadDataFromFile("dane1.txt", N, R, TAB))
+    if (loadDataFromFile(argv[1], N, R, TAB))
     {
-        int M = N - 2*R; // rozmiar tablicy OUT
+        int M = N - 2*R; // TAB array size
         if(M > 0){
             OUT = new float*[M];
             for (int i = 0; i < M; i++){

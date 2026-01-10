@@ -25,19 +25,19 @@ float calculateElement(float* TAB, int N, int R, int x, int y)
 // KERNEL
 // ##################
 
-___global__ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, int threadsNum)
+__global__ void addKernel(float* TAB, float* OUT, int M, int N, int R, int k, int threadsNum)
 {
 
-    // localId is calculated in wrong way, it is not coalescing
-    // subsequent threads are not allocated to subsequent memory cells
+    // localId is calculated in right way, it is coalescing
+    // subsequent threads are allocated to subsequent memory cells
 
 
-    int localId = threadIdx.x * blockDim.y + threadIdx.y;
+    int localId = threadIdx.y * blockDim.x + threadIdx.x;
 
-    int globalId = blockIdx.x + localId * gridDim.x;
+    int globalId = blockIdx.x * (blockDim.x * blockDim.y) + localId;
 
     for (int i = 0; i < k; i++) {
-        int finalIndex = globalId * k + i;
+         int finalIndex = threadsNum * i + globalId;
 
         if (finalIndex >= M * M) continue;
 
@@ -96,6 +96,7 @@ cudaError_t addWithCuda(
 
     block = dim3(BS, BS);
     grid = dim3((M * M + BS * BS * k - 1) / (BS * BS * k)); // formula is M*M / BS*BS*k, but it is ceil
+
     threadsNum = grid.x * block.x * block.y;
 
     addKernel<<<grid, block>>>(dev_tab, dev_out, M, N, R, k, threadsNum);
